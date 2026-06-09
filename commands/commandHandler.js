@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const { loadContacts, writeContacts } = require("../utils/fileUtils");
 const {
   addContact,
@@ -68,4 +69,6 @@ function handleCommand(args) {
 }
 
 module.exports = { handleCommand };
+=======
+>>>>>>> origin/ilan-branch
 
