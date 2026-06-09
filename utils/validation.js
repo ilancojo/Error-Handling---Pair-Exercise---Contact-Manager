@@ -1,7 +1,7 @@
 
 
 
-const errors = require("./errorType");
+const errors = require("./errorTypes");
 const ValidationError = errors.ValidationError;
 
 function validateName(name) {

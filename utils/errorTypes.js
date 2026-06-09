@@ -23,9 +23,15 @@ class CommandError extends ContactManagerError {
   }
 }
 
+class DuplicateContactError extends ContactManagerError {}
+class ContactNotFoundError extends ContactManagerError {}
+
 
 module.exports = {
   ContactManagerError,
   ValidationError,
-  CommandError
+  CommandError,
+
+  DuplicateContactError,
+  ContactNotFoundError
 };
