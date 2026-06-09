@@ -31,16 +31,20 @@ function loadContacts() {
   }
 }
 
-function saveContacts(contacts) {
-  try {
-    fs.writeFileSync(FILE_NAME, JSON.stringify(contacts, null, 2), "utf8");
-    console.log(`✓ Contacts saved to ${FILE_NAME}`);
-  } catch (error) {
-    throw new Error("Could not save contacts to file");
-  }
-}
+function writeContacts(contacts) {
+    try {
+        fs.writeFileSync(
+            FILE_NAME,
+            JSON.stringify(contacts, null, 2),
+            "utf8"
+        )
 
+        console.log(`✓ Contacts saved to ${FILE_NAME}`)
+    } catch (error) {
+        throw new Error("Could not save contacts to file")
+    }
+ }
 module.exports = {
   loadContacts,
-  saveContacts,
+  writeContacts,
 };
