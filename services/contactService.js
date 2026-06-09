@@ -1,13 +1,11 @@
 const { validateContact } = require("../utils/validation");
-
-const { DuplicateContactError,
-    ContactNotFoundError } = require("../utils/errorTypes");
-
+const { ValidationError, ContactManagerError } = require("../utils/errorTypes");
 
 function cleanText(value) {
   if (typeof value !== "string") {
     return value;
   }
+
   return value.trim();
 }
 
@@ -15,77 +13,101 @@ function normalizeText(value) {
   if (typeof value !== "string") {
     return "";
   }
+
   return value.trim().toLowerCase();
 }
-
-function normalizeEmail(email) {
-  return normalizeText(email);
-}
-
-
 
 function createContact(name, email, phone) {
   const contact = {
     name: cleanText(name),
     email: cleanText(email),
-    phone: cleanText(phone)
+    phone: cleanText(phone),
   };
+
   validateContact(contact);
+
   return contact;
 }
 
-function searchContacts(contacts, name) {
-  const normalizedName = normalizeText(name);
-
-  return contacts.filter(contact => {
-   
-    const contactName = normalizeText(contact.name);
-    return contactName.includes(normalizedName)
-    });
-}
-
 function checkDuplicateEmail(contacts, email) {
-  const normalizedEmail = normalizeEmail(email);
+  const normalizedEmail = normalizeText(email);
 
-  return contacts.some(contact => {
-    return normalizeEmail(contact.email) === normalizedEmail;
+  return contacts.some((contact) => {
+    return normalizeText(contact.email) === normalizedEmail;
   });
 }
 
-function addContact(contacts, contact) {
-  validateContact(contact);
-  const emailExists = checkDuplicateEmail(contacts, contact.email);
+function addContact(contacts, name, email, phone) {
+  const contact = createContact(name, email, phone);
 
-  if (emailExists) {
-    throw new DuplicateContactError("Contact with this email already exists");
+  if (checkDuplicateEmail(contacts, contact.email)) {
+    throw new Error("Contact with this email already exists");
   }
-  return [...contacts, contact];
+
+  contacts.push(contact);
+
+  console.log(`✓ Contact added: ${contact.name}`);
 }
 
 function deleteContact(contacts, email) {
-  const normalizedEmail = normalizeEmail(email);
+  const normalizedEmail = normalizeText(email);
 
-  const deletedContact = contacts.find(contact => {
-    return normalizeEmail(contact.email) === normalizedEmail;
+  const index = contacts.findIndex((contact) => {
+    return normalizeText(contact.email) === normalizedEmail;
   });
 
-  if (!deletedContact) {
-    throw new ContactNotFoundError(`No contact found with email: ${email}`);
+  if (index === -1) {
+    throw new Error(`No contact found with email: ${email}`);
   }
 
-  const updatedContacts = contacts.filter(contact => {
-    return normalizeEmail(contact.email) !== normalizedEmail;
+  const deletedContact = contacts.splice(index, 1)[0];
+
+  console.log(`✓ Contact deleted: ${deletedContact.name}`);
+}
+
+function listContacts(contacts) {
+  console.log("\n=== All Contacts ===");
+
+  if (contacts.length === 0) {
+    console.log("No contacts found");
+    return;
+  }
+
+  contacts.forEach((contact, index) => {
+    console.log(
+      `${index + 1}. ${contact.name} - ${contact.email} - ${contact.phone}`,
+    );
+  });
+}
+
+function searchContacts(contacts, query) {
+  const normalizedQuery = normalizeText(query);
+
+  const results = contacts.filter((contact) => {
+    return (
+      normalizeText(contact.name).includes(normalizedQuery) ||
+      normalizeText(contact.email).includes(normalizedQuery)
+    );
   });
 
-  return {
-    updatedContacts,
-    deletedContact
-  };
+  console.log(`\n=== Search Results for "${query}" ===`);
+
+  if (results.length === 0) {
+    console.log(`No contacts found matching "${query}"`);
+    return;
+  }
+
+  results.forEach((contact, index) => {
+    console.log(
+      `${index + 1}. ${contact.name} - ${contact.email} - ${contact.phone}`,
+    );
+  });
 }
 
 module.exports = {
   createContact,
-  searchContacts,
   addContact,
-  deleteContact
+  deleteContact,
+  listContacts,
+  searchContacts,
 };
